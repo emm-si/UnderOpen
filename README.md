@@ -4,10 +4,10 @@
 
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
-![PWA Ready](https://img.shields.io/badge/PWA-Ready-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow)
-![Cloudflare Pages](https://img.shields.io/badge/Deployed_on-Cloudflare_Pages-orange)
+[![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
+[![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow)](#)
+[![GitHub](https://img.shields.io/badge/GitHub-emm--si-black)](#)
 
 *UnderOpen est un jeu de société mobile gratuit (PWA), inspiré d'Undercover. Il se joue à tour de rôle sur un seul téléphone et fonctionne entièrement hors-ligne.*
 
@@ -54,7 +54,7 @@ Ce projet a été conçu pour être le plus léger et le plus rapide possible, s
 - **Frontend** : HTML5, CSS3, JavaScript (Vanilla ES6+).
 - **Architecture** : Machine à états simple (`state.js`), composants d'interface injectés dynamiquement (`app.js`).
 - **PWA** : Service Worker (`sw.js`) pour la mise en cache et `manifest.webmanifest` pour l'installation.
-- **Hébergement** : [Cloudflare Pages](https://pages.cloudflare.com/).
+- **Hébergement** : Cloudflare Pages.
 
 ---
 
@@ -66,10 +66,10 @@ Aucun outil de build (Webpack, Vite, etc.) n'est nécessaire. Le projet est du H
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/TON_NOM_UTILISATEUR/underopen.git
+git clone https://github.com/emm-si/UnderOpen.git
 
 # 2. Se rendre dans le dossier
-cd underopen
+cd UnderOpen
 
 # 3. Lancer un serveur local (ex: avec Python)
 python3 -m http.server 8080
