@@ -1,15 +1,15 @@
 <div align="center">
 
-# 🕵️ Underopen
+# 🕵️ UnderOpen
 
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
-[![PWA](https://img.shields.io/badge/PWA-Ready-success.svg)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E.svg?logo=javascript&logoColor=black)](#)
-[![Cloudflare Pages](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Pages-F38020.svg?logo=cloudflare&logoColor=white)](#)
+![PWA Ready](https://img.shields.io/badge/PWA-Ready-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow)
+![Cloudflare Pages](https://img.shields.io/badge/Deployed_on-Cloudflare_Pages-orange)
 
-*Underopen est un jeu de société mobile gratuit (PWA), inspiré d'Undercover. Il se joue à tour de rôle sur un seul téléphone et fonctionne entièrement hors-ligne.*
+*UnderOpen est un jeu de société mobile gratuit (PWA), inspiré d'Undercover. Il se joue à tour de rôle sur un seul téléphone et fonctionne entièrement hors-ligne.*
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 📖 À propos du jeu
 
-Underopen repose sur la déduction sociale et le bluff. Les joueurs reçoivent un mot secret, mais l'un d'entre eux n'a pas le même que les autres... ou n'en a pas du tout.
+UnderOpen repose sur la déduction sociale et le bluff. Les joueurs reçoivent un mot secret, mais l'un d'entre eux n'a pas le même que les autres... ou n'en a pas du tout.
 
 ### 🎭 Les Rôles
 
