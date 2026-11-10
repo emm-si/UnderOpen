@@ -4,10 +4,12 @@
 
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](#)
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=html,css,js,cloudflare" />
+</p>
+
 [![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
-[![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow)](#)
 [![GitHub](https://img.shields.io/badge/GitHub-emm--si-black)](#)
 
 *UnderOpen est un jeu de société mobile gratuit (PWA), inspiré d'Undercover. Il se joue à tour de rôle sur un seul téléphone et fonctionne entièrement hors-ligne.*
