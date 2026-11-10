@@ -4,7 +4,7 @@
 
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
-[![HTML5](https://img.shields.io/badge/HTML5-?style=for-the-badge&logo=html5&logoColor=white)](#)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26&logo=html5&logoColor=white)](#)
 [![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
 [![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow)](#)
