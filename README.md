@@ -5,10 +5,10 @@
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
 
-![HTML5](https://img.shields.io/badge/-HTML5-333333?style=flat&logo=html&logoColor=E34F26)
+![HTML5](https://img.shields.io/badge/-HTML5-333333?style=flat&logo=html5&logoColor=E34F26)
 ![CSS3](https://img.shields.io/badge/-CSS3-333333?style=flat&logo=css&logoColor=264DE4)
 ![JavaScript](https://img.shields.io/badge/-JavaScript-333333?style=flat&logo=javascript&logoColor=F7DF1E)
-[![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
+![PWA](https://img.shields.io/badge/-PWA-333333?style=flat&logo=pwa&logoColor=5A0FC8)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
 [![GitHub](https://img.shields.io/badge/GitHub-emm--si-black)](#)
 
