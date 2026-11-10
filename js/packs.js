@@ -8,8 +8,8 @@ function getPacks(lang) {
 function getRandomPair(packId, lang) {
   const packs = getPacks(lang);
   if (!packs || !packs[packId]) {
-    console.error(`Pack ${packId} introuvable pour la langue ${lang}`);
-    return ["Erreur", "Bug"]; // Fallback de sécurité
+    console.error(`Pack "${packId}" introuvable pour la langue "${lang}"`);
+    return ['Erreur', 'Bug'];
   }
   const pairs = packs[packId].pairs;
   return pairs[Math.floor(Math.random() * pairs.length)];

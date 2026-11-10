@@ -2,7 +2,7 @@
  * Gestion des rôles (Citoyens, Infiltrés, Captain Zero).
  */
 const Role = {
-  CITIZEN: 'citizen',
+  CITIZEN:    'citizen',
   INFILTRATOR: 'infiltrator',
   CAPTAIN_ZERO: 'captainZero'
 };
@@ -10,51 +10,41 @@ const Role = {
 function getDefaultRoles(playerCount) {
   if (playerCount < 3) return null;
 
-  let infiltrators = 1;
-  let captainZeros = 0;
+  let infiltrators = 1, captainZeros = 0;
 
-  if (playerCount === 3 || playerCount === 4) {
-    infiltrators = 1; captainZeros = 0;
-  } else if (playerCount >= 5 && playerCount <= 6) {
-    infiltrators = 1; captainZeros = 1;
-  } else if (playerCount >= 7 && playerCount <= 9) {
-    infiltrators = 2; captainZeros = 1;
-  } else if (playerCount >= 10) {
-    infiltrators = 3; captainZeros = 1;
-  }
+  if (playerCount >= 5 && playerCount <= 6)  { infiltrators = 1; captainZeros = 1; }
+  else if (playerCount >= 7 && playerCount <= 9) { infiltrators = 2; captainZeros = 1; }
+  else if (playerCount >= 10) { infiltrators = 3; captainZeros = 1; }
 
   const citizens = playerCount - infiltrators - captainZeros;
-
-  return {
-    citizens,
-    infiltrators,
-    captainZeros,
-    total: playerCount
-  };
+  return { citizens, infiltrators, captainZeros };
 }
 
-function isValidConfig(config) {
-  // RÈGLE STRICTE : Civils >= Infiltrés + Captain Zeros
-  return config.citizens >= (config.infiltrators + config.captainZeros);
+function isValidRoles(roles, totalPlayers) {
+  const citizens = totalPlayers - roles.infiltrators - roles.captainZeros;
+  return (
+    roles.infiltrators >= 1 &&
+    roles.captainZeros >= 0 &&
+    citizens >= 1 &&
+    citizens >= (roles.infiltrators + roles.captainZeros)
+  );
 }
 
-function assignRoles(config) {
-  const roles = [];
-  
-  for (let i = 0; i < config.citizens; i++) roles.push(Role.CITIZEN);
-  for (let i = 0; i < config.infiltrators; i++) roles.push(Role.INFILTRATOR);
-  for (let i = 0; i < config.captainZeros; i++) roles.push(Role.CAPTAIN_ZERO);
+function assignRoles(roles) {
+  const arr = [];
+  for (let i = 0; i < roles.citizens;     i++) arr.push(Role.CITIZEN);
+  for (let i = 0; i < roles.infiltrators; i++) arr.push(Role.INFILTRATOR);
+  for (let i = 0; i < roles.captainZeros; i++) arr.push(Role.CAPTAIN_ZERO);
 
-  // Mélange de Fisher-Yates
-  for (let i = roles.length - 1; i > 0; i--) {
+  // Mélange Fisher-Yates
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [roles[i], roles[j]] = [roles[j], roles[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  
-  return roles;
+  return arr;
 }
 
 window.Role = Role;
 window.getDefaultRoles = getDefaultRoles;
-window.isValidConfig = isValidConfig;
+window.isValidRoles = isValidRoles;
 window.assignRoles = assignRoles;

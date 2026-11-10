@@ -2,25 +2,27 @@
  * État global du jeu.
  */
 const GameState = {
-  players: [],
   config: {
     lang: 'fr',
     packId: 'everyday',
-    playersCount: 3,
+    playerCount: 4,
     roles: null,
   },
   game: {
     phase: 'home',
-    currentPlayerIndex: 0,
-    turn: 1,
     pair: null,
+    players: [],
+    currentRevealIdx: 0,
+    turn: 1,
+    currentTurnIdx: 0,
     winner: null,
-    pendingCaptainZero: null // Stocke l'ID de Captain Zero en attente de devinette
-  }
+    winMsg: ''
+  },
+  playerNames: []
 };
 
 function updatePlayerConfig(newCount) {
-  GameState.config.playersCount = newCount;
+  GameState.config.playerCount = newCount;
   GameState.config.roles = getDefaultRoles(newCount);
 }
 

@@ -1,394 +1,615 @@
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
 
+  // Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW error:', err));
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:', err));
   }
 
-  updatePlayerConfig(3);
+  updatePlayerConfig(4);
 
-  const screens = {
-    home: `
-      <div class="screen active" id="screen-home">
-        <div class="top-bar" style="justify-content: space-between;">
-          <div class="icon-btn" onclick="goToScreen('settings')">⚙️</div>
-          <div class="icon-btn" style="background:rgba(255,255,255,0.1)">👥</div>
-        </div>
-        <h1 class="title-large" style="margin-top: 50px;">Underopen</h1>
-        <p style="text-align: center; color: #aaa; margin-bottom: 20px;" id="home-pack-display"></p>
-        <button class="btn-main" style="margin-top: auto; margin-bottom: 40px;" onclick="goToScreen('setup')">JOUER</button>
-      </div>
-    `,
-    settings: `
-      <div class="screen active" id="screen-settings">
-        <div class="top-bar"><div class="icon-btn" onclick="goToScreen('home')">←</div></div>
-        <h2 class="title-large">Paramètres</h2>
-        
-        <div class="role-card" style="color: white; background: rgba(255,255,255,0.1);">
-          <h3>Langue / Language</h3>
-          <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-secondary" id="btn-lang-fr" style="width: 50%;" onclick="changeLang('fr')">Français</button>
-            <button class="btn-secondary" id="btn-lang-en" style="width: 50%;" onclick="changeLang('en')">English</button>
-          </div>
-        </div>
-        <button class="btn-main" style="margin-top: auto;" onclick="goToScreen('home')">Retour</button>
-      </div>
-    `,
-    packs: `
-      <div class="screen active" id="screen-packs">
-        <div class="top-bar"><div class="icon-btn" onclick="goToScreen('setup')">←</div></div>
-        <h2 class="title-large">Thèmes de mots</h2>
-        <div id="packs-list" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 70vh;">
-          <!-- Généré par JS -->
-        </div>
-      </div>
-    `,
-    setup: `
-      <div class="screen active" id="screen-setup">
-        <div class="top-bar" style="justify-content: space-between;">
-          <div class="icon-btn" onclick="goToScreen('home')">←</div>
-          <div style="text-align: center; color: #5c9bff; font-weight: bold;">
-            <div class="icon-btn" style="background:none; border:none; font-size: 30px; width:auto; height:auto;">👥</div>
-            Groupes
-          </div>
-        </div>
-        
-        <div class="players-display">
-          <h2 class="players-number">Joueurs : <span id="player-count-display">3</span></h2>
-        </div>
-        
-        <div class="slider-container">
-          <div class="avatar-indicator" id="avatar-indicator">👦🏻</div>
-          <input type="range" id="player-slider" min="3" max="15" value="3" oninput="handlePlayerSliderChange(this.value)">
-        </div>
-
-        <div class="role-card" id="role-card">
-          <div class="civil-badge" id="display-citizens">2 Civils</div>
-          
-          <div class="role-row">
-            <button class="circle-btn dark" id="btn-uc-minus" onclick="adjustRole('infiltrators', -1)">-</button>
-            <div class="role-pill undercover" id="display-uc">1 Infiltré</div>
-            <button class="circle-btn dark" id="btn-uc-plus" onclick="adjustRole('infiltrators', 1)">+</button>
-          </div>
-          
-          <div class="role-row">
-            <button class="circle-btn" id="btn-mw-minus" onclick="adjustRole('captainZeros', -1)">-</button>
-            <div class="role-pill mrwhite" id="display-mw">0 Captain Zero</div>
-            <button class="circle-btn" id="btn-mw-plus" onclick="adjustRole('captainZeros', 1)">+</button>
-          </div>
-        </div>
-
-        <div class="special-roles-banner" onclick="goToScreen('packs')" style="cursor: pointer;">
-          <p>Mots</p>
-          <strong id="setup-pack-display" style="font-size: 1.2rem;">Standards</strong>
-        </div>
-
-        <div style="display:flex; flex-direction:column; align-items:center; margin-top: auto;">
-          <button class="btn-main" onclick="startGame()">Commencer</button>
-        </div>
-      </div>
-    `,
-    reveal: `
-      <div class="screen active" id="screen-reveal">
-        <h2 class="title-large" style="margin-top:40px;">Joueur <span id="reveal-player-num">1</span></h2>
-        <div class="reveal-card" id="reveal-card" onclick="nextReveal()">
-          <p class="role-hint">Passe le téléphone, puis tape pour révéler</p>
-          <div class="word-display" id="reveal-word">•••</div>
-          <p class="role-hint" id="reveal-role-hint"></p>
-        </div>
-        <button class="btn-main" id="reveal-next-btn" onclick="nextReveal()">J'ai vu</button>
-      </div>
-    `,
-    play: `
-      <div class="screen active" id="screen-play">
-        <div class="top-bar">
-          <div class="icon-btn" onclick="goToScreen('settings')">⚙️</div>
-          <h2 style="font-size: 1.5rem;">Tour <span id="turn-number">1</span></h2>
-          <div class="icon-btn">❓</div>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <p style="color: #aaa; margin-bottom: 10px;">Joueurs en jeu : <span id="alive-count"></span></p>
-          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px;">
-            <div id="alive-players-list" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%;"></div>
-          </div>
-        </div>
-
-        <div class="reveal-card" style="margin-top: 0; padding: 20px;">
-           <p class="role-hint" style="font-size: 1rem;">À tour de rôle, donnez un indice sur votre mot. Puis votez pour éliminer un suspect.</p>
-        </div>
-
-        <button class="btn-main" style="margin-top: auto;" onclick="goToScreen('vote')">Passer au vote 🗳️</button>
-      </div>
-    `,
-    vote: `
-      <div class="screen active" id="screen-vote">
-        <h2 class="title-large" style="margin-top: 20px;">Qui est éliminé ?</h2>
-        <p style="text-align: center; color: #aaa; margin-bottom: 20px;">Touchez le nom du joueur à éliminer.</p>
-        
-        <div id="vote-list" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 60vh;">
-          <!-- Généré par JS -->
-        </div>
-      </div>
-    `,
-    captainGuess: `
-      <div class="screen active" id="screen-captain">
-        <h2 class="title-large" style="margin-top: 40px;">Captain Zero a été démasqué !</h2>
-        <div class="reveal-card" style="margin: 20px 0; padding: 30px 20px;">
-          <p class="role-hint">Pour voler la victoire, devine le mot des Citoyens :</p>
-          <input type="text" id="captain-guess-input" style="width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--primary); font-size: 1.2rem; text-align: center; margin: 20px 0; outline: none;" placeholder="Ton mot...">
-          <button class="btn-main" style="background: var(--primary); color: white; padding: 15px;" onclick="submitCaptainGuess()">Valider</button>
-        </div>
-      </div>
-    `,
-    result: `
-      <div class="screen active" id="screen-result">
-        <h2 class="title-large" style="margin-top: 40px;" id="result-title">Résultat</h2>
-        <div class="reveal-card" style="margin: 20px 0;">
-          <div class="word-display" id="result-icon" style="font-size: 4rem;">🏆</div>
-          <p class="role-hint" id="result-desc"></p>
-        </div>
-        <button class="btn-main" style="margin-top: auto;" onclick="goToScreen('home')">Retour à l'accueil</button>
-      </div>
-    `
-  };
-
-  window.goToScreen = (screenName) => {
-    if (screens[screenName]) {
-      app.innerHTML = screens[screenName];
-      GameState.game.phase = screenName;
-      
-      if (screenName === 'setup') updateSetupUI();
-      if (screenName === 'play') updatePlayUI();
-      if (screenName === 'vote') updateVoteUI();
-      if (screenName === 'packs') updatePacksUI();
-      if (screenName === 'settings') updateSettingsUI();
-      if (screenName === 'home') updateHomeUI();
+  // ═══════════════════════════════════════════════
+  //  NAVIGATION
+  // ═══════════════════════════════════════════════
+  window.goToScreen = (name) => {
+    GameState.game.phase = name;
+    if (SCREENS[name]) {
+      app.innerHTML = SCREENS[name]();
+      POST_RENDER[name]?.();
     }
   };
 
-  // --- UI UPDATES ---
-  window.updateHomeUI = () => {
-    const packs = getPacks(GameState.config.lang);
-    const packName = packs[GameState.config.packId] ? packs[GameState.config.packId].name : "Inconnu";
-    document.getElementById('home-pack-display').textContent = `Thème : ${packName}`;
-  };
+  // ═══════════════════════════════════════════════
+  //  WIN CONDITIONS  (appelé après chaque élimination)
+  // ═══════════════════════════════════════════════
+  window.checkWin = (eliminatedPlayer) => {
+    const alive    = GameState.game.players.filter(p => p.alive);
+    const infAlive = alive.filter(p => p.role === Role.INFILTRATOR);
+    const capAlive = alive.filter(p => p.role === Role.CAPTAIN_ZERO);
+    const citAlive = alive.filter(p => p.role === Role.CITIZEN);
 
-  window.updateSettingsUI = () => {
-    document.getElementById('btn-lang-fr').style.background = GameState.config.lang === 'fr' ? 'var(--primary)' : 'rgba(255,255,255,0.2)';
-    document.getElementById('btn-lang-fr').style.color = GameState.config.lang === 'fr' ? 'white' : 'black';
-    
-    document.getElementById('btn-lang-en').style.background = GameState.config.lang === 'en' ? 'var(--primary)' : 'rgba(255,255,255,0.2)';
-    document.getElementById('btn-lang-en').style.color = GameState.config.lang === 'en' ? 'white' : 'black';
-  };
-
-  window.changeLang = (lang) => {
-    GameState.config.lang = lang;
-    updateSettingsUI();
-  };
-
-  window.updatePacksUI = () => {
-    const packs = getPacks(GameState.config.lang);
-    const list = document.getElementById('packs-list');
-    list.innerHTML = Object.keys(packs).map(key => `
-      <button class="btn-secondary" style="width: 100%; margin: 0; padding: 20px; font-size: 1.2rem; background: ${GameState.config.packId === key ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; color: ${GameState.config.packId === key ? 'white' : 'white'}; border: 1px solid rgba(255,255,255,0.2);"
-        onclick="selectPack('${key}')">
-        ${packs[key].name}
-      </button>
-    `).join('');
-  };
-
-  window.selectPack = (packId) => {
-    GameState.config.packId = packId;
-    updatePacksUI();
-    setTimeout(() => goToScreen('setup'), 200); // Petit délai pour voir la sélection
-  };
-
-  window.updateSetupUI = () => {
-    const cfg = GameState.config, roles = cfg.roles;
-    if (!document.getElementById('player-slider')) return;
-
-    const packs = getPacks(cfg.lang);
-    const packName = packs[cfg.packId] ? packs[cfg.packId].name : "Standard";
-    document.getElementById('setup-pack-display').textContent = packName;
-
-    document.getElementById('player-count-display').textContent = cfg.playersCount;
-    document.getElementById('display-citizens').textContent = `${roles.citizens} Civils`;
-    document.getElementById('display-uc').textContent = `${roles.infiltrators} Infiltré${roles.infiltrators > 1 ? 's' : ''}`;
-    document.getElementById('display-mw').textContent = `${roles.captainZeros} Captain Zero${roles.captainZeros > 1 ? 's' : ''}`;
-
-    const percent = ((cfg.playersCount - 3) / (15 - 3)) * 100;
-    document.getElementById('avatar-indicator').style.left = `calc(${percent}% - 16px)`;
-
-    const canCustom = cfg.playersCount >= 5;
-    ['btn-uc-plus', 'btn-uc-minus', 'btn-mw-plus', 'btn-mw-minus'].forEach(id => {
-      document.getElementById(id).style.visibility = canCustom ? 'visible' : 'hidden';
-    });
-  };
-
-  window.handlePlayerSliderChange = (val) => {
-    updatePlayerConfig(parseInt(val, 10));
-    updateSetupUI();
-  };
-
-  window.adjustRole = (roleKey, delta) => {
-    const cfg = GameState.config;
-    if (cfg.playersCount < 5) return;
-
-    const newVal = cfg.roles[roleKey] + delta;
-    if (roleKey === 'captainZeros' && newVal < 0) return;
-    if (roleKey === 'infiltrators' && newVal < 1) return;
-
-    const tempInf = roleKey === 'infiltrators' ? newVal : cfg.roles.infiltrators;
-    const tempCap = roleKey === 'captainZeros' ? newVal : cfg.roles.captainZeros;
-    const tempCit = cfg.playersCount - tempInf - tempCap;
-
-    if (tempCit >= (tempInf + tempCap) && tempCit >= 1) {
-      cfg.roles[roleKey] = newVal;
-      cfg.roles.citizens = tempCit;
-      updateSetupUI();
+    // CAS 1 — Captain Zero éliminé → écran de devinette
+    if (eliminatedPlayer.role === Role.CAPTAIN_ZERO) {
+      goToScreen('captainGuess');
+      return;
     }
-  };
 
-  // --- REVEAL LOGIC ---
-  let isCardRevealed = false;
-
-  window.updateRevealUI = () => {
-    const idx = GameState.game.currentPlayerIndex;
-    document.getElementById('reveal-player-num').textContent = idx + 1;
-    document.getElementById('reveal-word').textContent = "•••";
-    document.getElementById('reveal-role-hint').textContent = "Passe le téléphone, puis tape pour révéler";
-    isCardRevealed = false;
-    document.getElementById('reveal-next-btn').textContent = "J'ai vu";
-  };
-
-  window.nextReveal = () => {
-    if (!isCardRevealed) {
-      const player = GameState.players[GameState.game.currentPlayerIndex];
-      document.getElementById('reveal-word').textContent = player.role === 'captainZero' ? "Captain Zero" : player.word;
-      document.getElementById('reveal-role-hint').textContent = player.role === 'captainZero' ? "Tu n'as pas de mot. Bluffe !" : "Mémorise ton mot.";
-      isCardRevealed = true;
-      document.getElementById('reveal-next-btn').textContent = "Suivant";
-    } else {
-      GameState.game.currentPlayerIndex++;
-      if (GameState.game.currentPlayerIndex >= GameState.players.length) {
-        GameState.game.turn = 1;
-        goToScreen('play');
-      } else {
-        updateRevealUI();
+    // CAS 2 — Tous les infiltrés sont morts
+    if (infAlive.length === 0) {
+      if (capAlive.length > 0) {
+        // Captain Zero encore vivant : vérifie la majorité
+        if (capAlive.length >= citAlive.length) {
+          endGame('infiltrators',
+            `Captain Zero seul domine (${capAlive.length} vs ${citAlive.length} citoyen(s)).`);
+        } else {
+          nextTurn();
+        }
+        return;
       }
+      // Plus personne côté imposteurs
+      endGame('citizens', 'Tous les imposteurs sont éliminés !');
+      return;
     }
+
+    // CAS 3 — Les imposteurs ont la majorité / parité
+    if ((infAlive.length + capAlive.length) >= citAlive.length) {
+      endGame('infiltrators',
+        `Les Infiltrés contrôlent la partie (${infAlive.length + capAlive.length} vs ${citAlive.length}).`);
+      return;
+    }
+
+    // Sinon, tour suivant
+    nextTurn();
+  };
+
+  function nextTurn() {
+    GameState.game.turn++;
+    GameState.game.currentTurnIdx = 0;
+    goToScreen('play');
+  }
+
+  window.endGame = (winner, msg) => {
+    GameState.game.winner = winner;
+    GameState.game.winMsg = msg;
+    goToScreen('result');
+  };
+
+  // ═══════════════════════════════════════════════
+  //  SCREENS (retournent du HTML)
+  // ═══════════════════════════════════════════════
+  const SCREENS = {};
+  const POST_RENDER = {};
+
+  // ── HOME ──────────────────────────────────────
+  SCREENS.home = () => {
+    const packs = getPacks(GameState.config.lang);
+    const packName = packs[GameState.config.packId]?.name ?? '…';
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('settings')">⚙️</div>
+          <span class="topbar-title">Thème : ${packName}</span>
+          <div class="icon-btn" onclick="goToScreen('packs')">🃏</div>
+        </div>
+        <div class="spacer"></div>
+        <div style="text-align:center;margin-bottom:12px">
+          <span class="logo-text">Underopen</span>
+          <p class="subtitle">Like Under Cover, en mieux</p>
+        </div>
+        <div class="spacer"></div>
+        <div class="home-btn-group">
+          <button class="btn btn-green" onclick="goToScreen('setup')">JOUER</button>
+          <button class="btn btn-ghost" onclick="goToScreen('rules')">Règles du jeu</button>
+        </div>
+      </div>`;
+  };
+
+  // ── RULES ─────────────────────────────────────
+  SCREENS.rules = () => `
+    <div class="screen active">
+      <div class="topbar">
+        <div class="icon-btn" onclick="goToScreen('home')">←</div>
+        <span class="topbar-title">Règles</span>
+        <div style="width:44px"></div>
+      </div>
+      <div class="scroll-area" style="padding-bottom:16px">
+        ${[
+          ['🧑‍🤝‍🧑 Citoyens',   'Reçoivent le mot secret. Donnez des indices sans trop le dévoiler.'],
+          ['🕵️ Infiltrés',   'Reçoivent un mot proche. Bluffez pour passer inaperçu.'],
+          ['🃏 Captain Zero', 'Pas de mot. Bluffez et déduisez. Si éliminé, devinez le mot des citoyens pour voler la victoire.'],
+          ['🗳️ Vote',        'Chaque tour : chacun donne un indice, puis un joueur est éliminé.'],
+          ['🛡️ Citoyens gagnent',      'Tous les imposteurs sont éliminés.'],
+          ['🕵️ Infiltrés gagnent',     'Ils obtiennent la majorité ou la parité avec les citoyens.'],
+          ['🃏 Captain Zero gagne',    'Éliminé ? Devinez le mot secret pour voler la victoire !'],
+        ].map(([t, d]) => `
+          <div class="card" style="margin-bottom:10px">
+            <div style="font-weight:800;margin-bottom:6px">${t}</div>
+            <div style="color:var(--text-muted);font-size:.9rem">${d}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // ── SETTINGS ──────────────────────────────────
+  SCREENS.settings = () => `
+    <div class="screen active">
+      <div class="topbar">
+        <div class="icon-btn" onclick="goToScreen('home')">←</div>
+        <span class="topbar-title">Paramètres</span>
+        <div style="width:44px"></div>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <div style="font-weight:700;margin-bottom:12px">Langue / Language</div>
+        <div class="lang-toggle">
+          <button class="lang-btn ${GameState.config.lang === 'fr' ? 'active' : ''}"
+            onclick="setLang('fr')">🇫🇷 Français</button>
+          <button class="lang-btn ${GameState.config.lang === 'en' ? 'active' : ''}"
+            onclick="setLang('en')">🇬🇧 English</button>
+        </div>
+      </div>
+    </div>`;
+
+  window.setLang = (lang) => {
+    GameState.config.lang = lang;
+    // Rebasculer vers un pack valide si nécessaire
+    const packs = getPacks(lang);
+    if (!packs[GameState.config.packId]) {
+      GameState.config.packId = Object.keys(packs)[0];
+    }
+    goToScreen('settings');
+  };
+
+  // ── PACKS ─────────────────────────────────────
+  SCREENS.packs = () => {
+    const packs = getPacks(GameState.config.lang);
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('home')">←</div>
+          <span class="topbar-title">Thèmes de mots</span>
+          <div style="width:44px"></div>
+        </div>
+        <div class="scroll-area" style="padding-top:4px">
+          ${Object.entries(packs).map(([id, { name }]) => `
+            <button class="pack-btn ${GameState.config.packId === id ? 'active' : ''}"
+              onclick="selectPack('${id}')">${name}</button>
+          `).join('')}
+        </div>
+      </div>`;
+  };
+
+  window.selectPack = (id) => {
+    GameState.config.packId = id;
+    setTimeout(() => goToScreen('setup'), 160);
+  };
+
+  // ── SETUP ─────────────────────────────────────
+  SCREENS.setup = () => {
+    if (!GameState.config.roles) updatePlayerConfig(GameState.config.playerCount);
+    const r = GameState.config.roles;
+    const n = GameState.config.playerCount;
+    const pct = ((n - 3) / (15 - 3)) * 100;
+    const canCustom = n >= 5;
+    const emoji = n <= 4 ? '👦🏻' : n <= 7 ? '👨🏻' : n <= 10 ? '👨🏻‍👩🏻' : '👨‍👩‍👦‍👦';
+    const packs = getPacks(GameState.config.lang);
+    const packName = packs[GameState.config.packId]?.name ?? '…';
+
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('home')">←</div>
+          <span class="topbar-title">Configuration</span>
+          <div class="icon-btn" onclick="goToScreen('packs')">🃏</div>
+        </div>
+
+        <div class="player-count-display">
+          <div class="player-count-num">${n}</div>
+          <div class="player-count-label">joueurs</div>
+        </div>
+
+        <div class="slider-wrap">
+          <span class="slider-emoji" style="left:calc(${pct}% + ${(0.5 - pct / 100) * 0}px)">${emoji}</span>
+          <input type="range" min="3" max="15" value="${n}"
+            oninput="handleSlider(parseInt(this.value))" style="margin-top:8px">
+        </div>
+
+        <div class="card">
+          <div class="role-row">
+            <div>
+              <div class="role-name">🧑‍🤝‍🧑 Citoyens</div>
+              <div style="color:var(--text-muted);font-size:.8rem">Mot commun</div>
+            </div>
+            <div class="role-count" style="color:var(--primary)">${r.citizens}</div>
+          </div>
+
+          <div class="role-row">
+            <div>
+              <div class="role-name">🕵️ Infiltrés</div>
+              <div style="color:var(--text-muted);font-size:.8rem">Mot proche</div>
+            </div>
+            <div class="role-ctrl" style="${canCustom ? '' : 'visibility:hidden'}">
+              <button class="circle-btn" onclick="adjustRole('infiltrators',-1)"
+                ${r.infiltrators <= 1 ? 'disabled' : ''}>−</button>
+              <div class="role-count">${r.infiltrators}</div>
+              <button class="circle-btn" onclick="adjustRole('infiltrators',1)">+</button>
+            </div>
+            ${!canCustom ? `<div class="role-count">${r.infiltrators}</div>` : ''}
+          </div>
+
+          <div class="role-row">
+            <div>
+              <div class="role-name">🃏 Captain Zero</div>
+              <div style="color:var(--text-muted);font-size:.8rem">Aucun mot</div>
+            </div>
+            <div class="role-ctrl" style="${canCustom ? '' : 'visibility:hidden'}">
+              <button class="circle-btn" onclick="adjustRole('captainZeros',-1)"
+                ${r.captainZeros <= 0 ? 'disabled' : ''}>−</button>
+              <div class="role-count">${r.captainZeros}</div>
+              <button class="circle-btn" onclick="adjustRole('captainZeros',1)">+</button>
+            </div>
+            ${!canCustom ? `<div class="role-count">${r.captainZeros}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;cursor:pointer" onclick="goToScreen('packs')">
+          <div style="font-size:.8rem;color:var(--text-muted)">Thème actuel</div>
+          <div style="font-weight:800;font-size:1.1rem;margin-top:4px">${packName} →</div>
+        </div>
+
+        <button class="btn btn-blue" style="margin-top:auto" onclick="goToScreen('names')">
+          Nommer les joueurs →
+        </button>
+        <div style="height:8px"></div>
+      </div>`;
+  };
+
+  window.handleSlider = (val) => { updatePlayerConfig(val); goToScreen('setup'); };
+
+  window.adjustRole = (key, delta) => {
+    const r = GameState.config.roles;
+    const n = GameState.config.playerCount;
+    const newInf = key === 'infiltrators' ? r.infiltrators + delta : r.infiltrators;
+    const newCap = key === 'captainZeros' ? r.captainZeros + delta : r.captainZeros;
+    const newCit = n - newInf - newCap;
+    if (newInf >= 1 && newCap >= 0 && newCit >= 1 && newCit >= (newInf + newCap)) {
+      GameState.config.roles.infiltrators = newInf;
+      GameState.config.roles.captainZeros = newCap;
+      GameState.config.roles.citizens     = newCit;
+      goToScreen('setup');
+    }
+  };
+
+  // ── NAMES ─────────────────────────────────────
+  SCREENS.names = () => {
+    const n = GameState.config.playerCount;
+    // Préserver les noms existants ou créer les défauts
+    if (!GameState.playerNames.length || GameState.playerNames.length !== n) {
+      GameState.playerNames = Array.from({ length: n }, (_, i) =>
+        GameState.playerNames[i] || `Joueur ${i + 1}`);
+    }
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('setup')">←</div>
+          <span class="topbar-title">Noms des joueurs</span>
+          <div style="width:44px"></div>
+        </div>
+        <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:12px">
+          Optionnel — laissez vide pour les noms par défaut
+        </p>
+        <div class="name-input-list">
+          ${GameState.playerNames.map((name, i) => `
+            <div class="name-row">
+              <span class="name-num">${i + 1}</span>
+              <input class="name-input" id="name-input-${i}"
+                type="text" value="${name}" placeholder="Joueur ${i + 1}"
+                oninput="saveName(${i}, this.value)" maxlength="20">
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-green" style="margin-top:14px" onclick="startGame()">
+          C'est parti ! 🎲
+        </button>
+        <div style="height:8px"></div>
+      </div>`;
+  };
+
+  window.saveName = (i, val) => {
+    GameState.playerNames[i] = val.trim() || `Joueur ${i + 1}`;
   };
 
   window.startGame = () => {
     const cfg = GameState.config;
-    GameState.game.pair = getRandomPair(cfg.packId, cfg.lang);
-    const assignedRoles = assignRoles(cfg.roles);
-    
-    GameState.players = assignedRoles.map((role, i) => ({
-      id: i, name: `Joueur ${i + 1}`, role: role, alive: true,
-      word: role === 'citizen' ? GameState.game.pair[0] : (role === 'infiltrator' ? GameState.game.pair[1] : '')
+    const pair = getRandomPair(cfg.packId, cfg.lang);
+    const roles = assignRoles(cfg.roles);
+
+    GameState.game.pair    = pair;
+    GameState.game.winner  = null;
+    GameState.game.winMsg  = '';
+    GameState.game.turn    = 1;
+    GameState.game.currentRevealIdx = 0;
+    GameState.game.currentTurnIdx   = 0;
+
+    GameState.game.players = roles.map((role, i) => ({
+      id:    i,
+      name:  GameState.playerNames[i] || `Joueur ${i + 1}`,
+      role,
+      alive: true,
+      word:  role === Role.CITIZEN ? pair[0]
+           : role === Role.INFILTRATOR ? pair[1]
+           : null
     }));
 
-    GameState.game.currentPlayerIndex = 0;
-    GameState.game.turn = 1;
-    GameState.game.pendingCaptainZero = null;
     goToScreen('reveal');
-    updateRevealUI();
   };
 
-  // --- PLAY LOGIC ---
-  window.updatePlayUI = () => {
-    document.getElementById('turn-number').textContent = GameState.game.turn || 1;
-    const alivePlayers = GameState.players.filter(p => p.alive);
-    document.getElementById('alive-count').textContent = `${alivePlayers.length} / ${GameState.players.length}`;
-    
-    const list = document.getElementById('alive-players-list');
-    list.innerHTML = alivePlayers.map(p => `
-      <div style="background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2);">
+  // ── REVEAL ────────────────────────────────────
+  let revealOpen = false;
+
+  SCREENS.reveal = () => {
+    revealOpen = false;
+    const idx   = GameState.game.currentRevealIdx;
+    const total = GameState.game.players.length;
+    const pName = GameState.game.players[idx].name;
+
+    return `
+      <div class="screen active">
+        <h2 class="title" style="font-size:1.5rem;padding-top:8px">
+          ${idx + 1} / ${total}
+        </h2>
+        <p class="subtitle">${pName}</p>
+
+        <div class="reveal-card" onclick="toggleReveal()">
+          <p class="reveal-hint" id="reveal-hint">
+            Passe le téléphone,<br>puis tape pour révéler
+          </p>
+          <div id="reveal-content" style="display:none;text-align:center"></div>
+        </div>
+
+        <button class="btn btn-blue" id="reveal-next-btn"
+          style="display:none" onclick="nextReveal()">Suivant →</button>
+        <div style="height:16px;flex-shrink:0"></div>
+      </div>`;
+  };
+
+  window.toggleReveal = () => {
+    if (revealOpen) return;
+    revealOpen = true;
+
+    const player  = GameState.game.players[GameState.game.currentRevealIdx];
+    const isLast  = GameState.game.currentRevealIdx >= GameState.game.players.length - 1;
+    const hintEl  = document.getElementById('reveal-hint');
+    const contEl  = document.getElementById('reveal-content');
+    const nextBtn = document.getElementById('reveal-next-btn');
+
+    hintEl.style.display = 'none';
+
+    if (player.role === Role.CAPTAIN_ZERO) {
+      contEl.innerHTML = `
+        <div class="reveal-word" style="font-size:3rem">?</div>
+        <div class="reveal-role-badge badge-captain">🃏 Captain Zero</div>
+        <p style="color:#555;font-size:.85rem;margin-top:10px">Tu n'as aucun mot — écoute et bluffe !</p>`;
+    } else {
+      const isCit = player.role === Role.CITIZEN;
+      contEl.innerHTML = `
+        <div class="reveal-word">${player.word}</div>
+        <div class="reveal-role-badge ${isCit ? 'badge-citizen' : 'badge-infiltrator'}">
+          ${isCit ? '🧑‍🤝‍🧑 Citoyen' : '🕵️ Infiltré'}
+        </div>
+        <p style="color:#555;font-size:.85rem;margin-top:10px">Mémorise ton mot.</p>`;
+    }
+
+    contEl.style.display = 'block';
+    nextBtn.textContent  = isLast ? 'Lancer la partie 🎮' : 'Suivant →';
+    nextBtn.style.display = 'block';
+  };
+
+  window.nextReveal = () => {
+    GameState.game.currentRevealIdx++;
+    if (GameState.game.currentRevealIdx >= GameState.game.players.length) {
+      GameState.game.currentRevealIdx = 0;
+      goToScreen('play');
+    } else {
+      goToScreen('reveal');
+    }
+  };
+
+  // ── PLAY ──────────────────────────────────────
+  SCREENS.play = () => {
+    const alive = GameState.game.players.filter(p => p.alive);
+    const chips = alive.map((p, i) => `
+      <div class="player-chip ${i === GameState.game.currentTurnIdx ? 'turn-active' : ''}">
         ${p.name}
-      </div>
-    `).join('');
+      </div>`).join('');
+
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('home')" title="Quitter">🏠</div>
+          <span class="topbar-title">Tour ${GameState.game.turn}</span>
+          <div class="icon-btn" onclick="goToScreen('rules')">❓</div>
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:10px">
+            ${alive.length} joueur(s) encore en jeu
+          </div>
+          <div class="alive-grid">${chips}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);margin-top:8px;text-align:center">
+            🔵 = joue en ce moment
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:auto">
+          <p style="color:var(--text-muted);font-size:.9rem;text-align:center">
+            Chacun donne un indice à son tour, puis votez pour éliminer un suspect.
+          </p>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-ghost" style="flex:1;padding:14px;font-size:.9rem"
+            onclick="advanceTurn()">Suivant 👤</button>
+          <button class="btn btn-danger" style="flex:1;padding:14px;font-size:.9rem"
+            onclick="goToScreen('vote')">Voter 🗳️</button>
+        </div>
+        <div style="height:8px"></div>
+      </div>`;
   };
 
-  // --- VOTE LOGIC ---
-  window.updateVoteUI = () => {
-    const list = document.getElementById('vote-list');
-    const alivePlayers = GameState.players.filter(p => p.alive);
-    
-    list.innerHTML = alivePlayers.map(p => `
-      <button class="btn-secondary" style="width: 100%; margin: 0; padding: 15px; font-size: 1.2rem; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);" 
-        onclick="eliminatePlayer(${p.id})">
-        Éliminer ${p.name}
-      </button>
-    `).join('');
-  };
-
-  window.eliminatePlayer = (playerId) => {
-    const player = GameState.players.find(p => p.id === playerId);
-    player.alive = false;
-
-    const alivePlayers = GameState.players.filter(p => p.alive);
-    const aliveInfiltrators = alivePlayers.filter(p => p.role === 'infiltrator');
-    const aliveCaptainZero = alivePlayers.filter(p => p.role === 'captainZero');
-    const aliveCitizens = alivePlayers.filter(p => p.role === 'citizen');
-
-    // CAS 1 : Captain Zero vient d'être éliminé -> Écran de devinette
-    if (player.role === 'captainZero') {
-        GameState.game.pendingCaptainZero = player.id;
-        goToScreen('captainGuess');
-        setTimeout(() => document.getElementById('captain-guess-input').focus(), 100);
-        return;
-    }
-
-    // CAS 2 : Tous les infiltrés sont éliminés
-    if (aliveInfiltrators.length === 0) {
-        if (aliveCaptainZero.length > 0) {
-            // Captain Zero est toujours en vie, le jeu continue
-            GameState.game.turn++;
-            goToScreen('play');
-            return;
-        }
-        return endGame('citizens', "Tous les infiltrés ont été démasqués ! Les Citoyens gagnent.");
-    }
-
-    // CAS 3 : Les Citoyens n'ont plus la majorité
-    if ((aliveInfiltrators.length + aliveCaptainZero.length) >= aliveCitizens.length) {
-        return endGame('infiltrators', "Les Infiltrés et Captain Zero ont pris le contrôle ! Ils gagnent.");
-    }
-
-    // Sinon, tour suivant
-    GameState.game.turn++;
+  window.advanceTurn = () => {
+    const alive = GameState.game.players.filter(p => p.alive);
+    GameState.game.currentTurnIdx = (GameState.game.currentTurnIdx + 1) % alive.length;
     goToScreen('play');
   };
 
+  // ── VOTE ──────────────────────────────────────
+  SCREENS.vote = () => {
+    const alive = GameState.game.players.filter(p => p.alive);
+    return `
+      <div class="screen active">
+        <div class="topbar">
+          <div class="icon-btn" onclick="goToScreen('play')">←</div>
+          <span class="topbar-title">Vote — Tour ${GameState.game.turn}</span>
+          <div style="width:44px"></div>
+        </div>
+        <h2 class="title" style="font-size:1.6rem;margin-bottom:6px">Qui éliminer ?</h2>
+        <p class="subtitle" style="margin-bottom:16px">Touchez le nom du joueur éliminé</p>
+        <div class="scroll-area">
+          ${alive.map(p => `
+            <button class="vote-btn" onclick="eliminatePlayer(${p.id})">${p.name}</button>
+          `).join('')}
+        </div>
+      </div>`;
+  };
+
+  window.eliminatePlayer = (id) => {
+    const player = GameState.game.players.find(p => p.id === id);
+    player.alive = false;
+    GameState.game.currentTurnIdx = 0;
+    checkWin(player);
+  };
+
+  // ── CAPTAIN GUESS ─────────────────────────────
+  SCREENS.captainGuess = () => {
+    const cap = GameState.game.players
+      .filter(p => p.role === Role.CAPTAIN_ZERO && !p.alive)
+      .pop();
+    const capName = cap?.name ?? 'Captain Zero';
+
+    return `
+      <div class="screen active">
+        <h2 class="title" style="font-size:1.5rem;margin-top:16px">
+          ${capName} est éliminé !
+        </h2>
+        <p class="subtitle">Dernière chance de voler la victoire</p>
+
+        <div class="card" style="margin:20px 0;text-align:center;padding:28px 20px">
+          <p style="color:var(--text-muted)">Devine le mot des Citoyens :</p>
+          <input class="guess-input" id="captain-input" type="text"
+            placeholder="Ton mot…" autocomplete="off" autocorrect="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter') submitCaptainGuess()">
+          <button class="btn btn-blue" onclick="submitCaptainGuess()">Valider</button>
+        </div>
+      </div>`;
+  };
+
+  POST_RENDER.captainGuess = () => {
+    setTimeout(() => document.getElementById('captain-input')?.focus(), 100);
+  };
+
   window.submitCaptainGuess = () => {
-    const guess = document.getElementById('captain-guess-input').value.trim().toLowerCase();
-    const actualWord = GameState.game.pair[0].toLowerCase();
+    const guess  = document.getElementById('captain-input').value.trim().toLowerCase();
+    const actual = GameState.game.pair[0].toLowerCase();
 
-    if (guess === actualWord) {
-        endGame('captainZero', `Captain Zero a deviné le mot "${GameState.game.pair[0]}" ! Victoire volée !`);
-    } else {
-        // Échec de la devinette
-        const aliveInfiltrators = GameState.players.filter(p => p.alive && p.role === 'infiltrator');
-        if (aliveInfiltrators.length === 0) {
-            endGame('citizens', `Captain Zero a échoué (le mot était "${GameState.game.pair[0]}"). Les Citoyens gagnent !`);
-        } else {
-            // Le jeu continue avec les autres joueurs
-            GameState.game.turn++;
-            goToScreen('play');
-        }
+    if (guess === actual) {
+      endGame('captainZero', `Captain Zero a deviné "${GameState.game.pair[0]}" — victoire volée ! 🃏`);
+      return;
     }
+
+    // Échec de la devinette : recalcule l'état
+    const alive    = GameState.game.players.filter(p => p.alive);
+    const infAlive = alive.filter(p => p.role === Role.INFILTRATOR);
+    const capAlive = alive.filter(p => p.role === Role.CAPTAIN_ZERO);
+    const citAlive = alive.filter(p => p.role === Role.CITIZEN);
+
+    if (infAlive.length === 0) {
+      endGame('citizens',
+        `Captain Zero a raté (le mot était "${GameState.game.pair[0]}"). Les Citoyens gagnent !`);
+      return;
+    }
+
+    if ((infAlive.length + capAlive.length) >= citAlive.length) {
+      endGame('infiltrators', `Les Infiltrés ont la majorité malgré l'échec de Captain Zero.`);
+      return;
+    }
+
+    // Jeu continue
+    GameState.game.turn++;
+    GameState.game.currentTurnIdx = 0;
+    goToScreen('play');
   };
 
-  window.endGame = (winner, message) => {
-    GameState.game.winner = winner;
-    goToScreen('result');
-    
-    document.getElementById('result-title').textContent = winner === 'citizens' ? "Victoire des Citoyens !" : (winner === 'infiltrators' ? "Victoire des Infiltrés !" : "Victoire de Captain Zero !");
-    document.getElementById('result-icon').textContent = winner === 'citizens' ? "🛡️" : (winner === 'infiltrators' ? "🕵️" : "🃏");
-    document.getElementById('result-desc').textContent = message;
+  // ── RESULT ────────────────────────────────────
+  SCREENS.result = () => {
+    const w = GameState.game.winner;
+    const icons  = { citizens: '🛡️', infiltrators: '🕵️', captainZero: '🃏' };
+    const titles = {
+      citizens:    'Victoire des Citoyens !',
+      infiltrators:'Victoire des Infiltrés !',
+      captainZero: 'Captain Zero a volé la victoire !'
+    };
+    const colors = { citizens: '#4ade80', infiltrators: '#f87171', captainZero: '#fbbf24' };
+
+    const citPlayers = GameState.game.players.filter(p => p.role === Role.CITIZEN);
+    const infPlayers = GameState.game.players.filter(p => p.role === Role.INFILTRATOR);
+    const capPlayers = GameState.game.players.filter(p => p.role === Role.CAPTAIN_ZERO);
+
+    return `
+      <div class="screen active">
+        <div class="result-icon">${icons[w]}</div>
+        <h2 class="title" style="font-size:1.6rem;color:${colors[w]}">${titles[w]}</h2>
+        <p class="subtitle" style="margin-bottom:16px">${GameState.game.winMsg}</p>
+
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-weight:700;margin-bottom:10px;font-size:.9rem;color:var(--text-muted)">
+            Les mots de cette partie
+          </div>
+          <div class="result-words">
+            <div class="word-pill word-citizen">🧑‍🤝‍🧑 ${GameState.game.pair[0]}</div>
+            <div class="word-pill word-infiltrator">🕵️ ${GameState.game.pair[1]}</div>
+          </div>
+        </div>
+
+        <div class="card scroll-area" style="margin-bottom:12px;max-height:200px">
+          <div style="font-weight:700;margin-bottom:8px;font-size:.9rem;color:var(--text-muted)">
+            Révélation des rôles
+          </div>
+          ${[
+            ...citPlayers.map(p => `
+              <div class="score-row score-citizen">
+                <span>${p.name}</span>
+                <span style="font-size:.8rem">🧑‍🤝‍🧑 Citoyen</span>
+              </div>`),
+            ...infPlayers.map(p => `
+              <div class="score-row score-infiltrator">
+                <span>${p.name}</span>
+                <span style="font-size:.8rem">🕵️ Infiltré</span>
+              </div>`),
+            ...capPlayers.map(p => `
+              <div class="score-row score-captain">
+                <span>${p.name}</span>
+                <span style="font-size:.8rem">🃏 Captain Zero</span>
+              </div>`),
+          ].join('')}
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:auto;padding-bottom:8px">
+          <button class="btn btn-ghost" style="flex:1" onclick="replayGame()">Rejouer</button>
+          <button class="btn btn-green" style="flex:1" onclick="goToScreen('home')">Accueil</button>
+        </div>
+      </div>`;
   };
 
+  window.replayGame = () => { goToScreen('names'); };
+
+  // ── BOOT ──────────────────────────────────────
   goToScreen('home');
 });
