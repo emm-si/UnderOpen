@@ -5,7 +5,7 @@
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
 ![Python](https://img.shields.io/badge/-Python-333333?style=flat&logo=python&logoColor=3776AB)
-
+![HTML5](https://img.shields.io/badge/-HTML5-333333?style=flat&logo=html5&logoColor=E34F26)
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
