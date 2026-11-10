@@ -4,9 +4,8 @@
 
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=html,css,js,cloudflare,mit" />
-</p>
+![Python](https://img.shields.io/badge/-Python-333333?style=flat&logo=python&logoColor=3776AB)
+
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#)
