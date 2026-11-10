@@ -5,7 +5,7 @@
 **Le jeu de déduction sociale et de mots secrets, directement dans ta poche.**
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=html,css,js,cloudflare" />
+  <img src="https://skillicons.dev/icons?i=html,css,js,cloudflare,pwa" />
 </p>
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)](#)
