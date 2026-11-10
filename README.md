@@ -9,7 +9,7 @@
 ![CSS3](https://img.shields.io/badge/-CSS3-333333?style=flat&logo=css&logoColor=264DE4)
 ![JavaScript](https://img.shields.io/badge/-JavaScript-333333?style=flat&logo=javascript&logoColor=F7DF1E)
 ![PWA](https://img.shields.io/badge/-PWA-333333?style=flat&logo=pwa&logoColor=5A0FC8)
-![Licence](https://img.shields.io/badge/MIT-Licence?labelColor=FFFFFF&color=555555&style=flat&logo=opensourceinitiative&logoColor=000000)
+![Licence](https://img.shields.io/badge/Logo_MIT-Licence?labelColor=FFFFFF&color=555555&style=flat&logo=opensourceinitiative&logoColor=000000)
 ![GitHub](https://img.shields.io/badge/-emm--si-333333?style=flat&logo=github&logoColor=FFFFFF)
 
 *UnderOpen est un jeu de société mobile gratuit (PWA), inspiré d'Undercover. Il se joue à tour de rôle sur un seul téléphone et fonctionne entièrement hors-ligne.*
